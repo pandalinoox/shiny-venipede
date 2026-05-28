@@ -1,0 +1,60 @@
+name: Integration Tests
+
+on:
+  pull_request:
+    branches:
+      - main
+
+  push:
+    branches:
+      - main
+
+  workflow_dispatch:
+
+concurrency:
+  group: integration-tests-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  integration:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        python-version: ["3.14"]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+
+      - name: Clone Pokemon Showdown
+        run: |
+          git clone https://github.com/smogon/pokemon-showdown.git
+          cd pokemon-showdown
+          npm install
+
+      - name: Start Pokemon Showdown server
+        run: |
+          cd pokemon-showdown
+          node pokemon-showdown start --no-security &
+          sleep 10
+
+      - name: Sync dependencies
+        run: uv sync --all-groups
+
+      - name: Run integration tests
+        run: uv run pytest tests/integration -v
