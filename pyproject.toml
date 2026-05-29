@@ -84,4 +84,5 @@ project-includes = [
     "**/*.py*",
     "**/*.ipynb",
 ]
+search-path = ["."]
 preset="strict"
