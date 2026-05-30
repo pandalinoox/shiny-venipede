@@ -10,6 +10,12 @@ from poke_env.player import (
     Player,
     SingleBattleOrder,
 )
+from poke_env.ps_client import (
+    AccountConfiguration,
+    LocalhostServerConfiguration,
+    ServerConfiguration,
+)
+from poke_env.teambuilder.teambuilder import Teambuilder
 
 from shiny_venipede.strategies.tera.null_tera_strategy import NULL_TERA_STRATEGY
 from shiny_venipede.strategies.tera.tera_strategy import TeraStrategy
@@ -27,15 +33,34 @@ class MetronomePlayer(Player):
     Attributes:
         _tera_strategy (TeraStrategy): Strategy to determine which orders may Terastallize.
         Defaults to NULL_TERA_STRATEGY.
+
+    Constants:
+        BATTLE_FORMAT: set to gen9metronomebattle
     """
+
+    BATTLE_FORMAT = "gen9metronomebattle"
 
     def __init__(
         self,
         *args: Any,
+        account_configuration: AccountConfiguration | None = None,
+        avatar: str | None = None,
+        server_configuration: ServerConfiguration = LocalhostServerConfiguration,
+        start_listening: bool = True,
+        team: str | Teambuilder | None = None,
         tera_strategy: TeraStrategy = NULL_TERA_STRATEGY,
         **kwargs: Any,
     ):
-        super().__init__(*args, **kwargs)
+        super().__init__(
+            *args,
+            account_configuration=account_configuration,
+            avatar=avatar,
+            battle_format=self.BATTLE_FORMAT,
+            server_configuration=server_configuration,
+            start_listening=start_listening,
+            team=team,
+            **kwargs,
+        )
         self._tera_strategy = tera_strategy
 
     def _filter_non_tera_orders(
