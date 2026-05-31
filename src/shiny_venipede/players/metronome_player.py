@@ -57,6 +57,7 @@ class MetronomePlayer(Player):
             avatar=avatar,
             battle_format=self.BATTLE_FORMAT,
             server_configuration=server_configuration,
+            start_timer_on_battle_start=True,
             start_listening=start_listening,
             team=team,
             **kwargs,
