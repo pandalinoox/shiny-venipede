@@ -1,5 +1,6 @@
 import pytest
-from src.shiny_venipede.players.metronome_player import MetronomePlayer
+
+from shiny_venipede.players.metronome_player import MetronomePlayer
 
 
 @pytest.fixture

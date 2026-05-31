@@ -3,7 +3,6 @@ from unittest.mock import Mock, patch
 import pytest
 from poke_env.battle import AbstractBattle, DoubleBattle
 from poke_env.player import DefaultBattleOrder, DoubleBattleOrder
-from src.shiny_venipede.players.metronome_player import MetronomePlayer
 from tests.support.builders.double_battle_builder import DoubleBattleBuilder
 from tests.support.builders.double_battle_order_builder import DoubleBattleOrderBuilder
 from tests.support.utils.orders import (
@@ -11,6 +10,8 @@ from tests.support.utils.orders import (
     create_double_battle_order_with_first,
     create_tera_order,
 )
+
+from shiny_venipede.players.metronome_player import MetronomePlayer
 
 
 def test_get_orders_returns_joined_orders(
