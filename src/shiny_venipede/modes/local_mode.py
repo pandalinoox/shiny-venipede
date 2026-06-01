@@ -1,8 +1,7 @@
 from typing import override
 
-from poke_env.player import Player
-
 from shiny_venipede.modes.mode import Mode
+from shiny_venipede.players.metronome_player import MetronomePlayer
 
 
 class LocalMode(Mode):
@@ -14,7 +13,7 @@ class LocalMode(Mode):
         _bot2 (Player): Second bot participating in battle.
     """
 
-    def __init__(self, bot1: Player, bot2: Player):
+    def __init__(self, bot1: MetronomePlayer, bot2: MetronomePlayer):
         self._bot1 = bot1
         self._bot2 = bot2
 
