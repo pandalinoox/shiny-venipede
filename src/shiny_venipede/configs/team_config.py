@@ -25,8 +25,8 @@ MEGA_ABSOL_TEAM = TeamConfig(
     Lonely Nature
     - Metronome
 
-    Chandelure-Mega @ Mirror Herb
-    Ability: Spicy Spray
+    Chandelure-Mega @ Choice Specs
+    Ability: Storm Drain
     EVs: 252 HP / 252 Atk / 252 Def / 252 SpA / 252 SpD / 252 Spe
     Hasty Nature
     - Metronome
