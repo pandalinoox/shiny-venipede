@@ -9,8 +9,8 @@ class LocalMode(Mode):
     Concrete implementation of Mode for running local battles between two bot1
 
     Attributes:
-        _bot1 (Player): First bot participating in battle.
-        _bot2 (Player): Second bot participating in battle.
+        _bot1 (MetronomePlayer): First bot participating in battle.
+        _bot2 (MetronomePlayer): Second bot participating in battle.
     """
 
     def __init__(self, bot1: MetronomePlayer, bot2: MetronomePlayer):
