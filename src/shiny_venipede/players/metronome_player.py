@@ -19,7 +19,7 @@ from poke_env.teambuilder.teambuilder import Teambuilder
 
 from shiny_venipede.strategies.tera.null_tera_strategy import NULL_TERA_STRATEGY
 from shiny_venipede.strategies.tera.tera_strategy import TeraStrategy
-from shiny_venipede.utils.logger import error_logger
+from shiny_venipede.utils.logger import ERROR_LOGGER
 
 
 class MetronomePlayer(Player):
@@ -60,6 +60,7 @@ class MetronomePlayer(Player):
             start_timer_on_battle_start=True,
             start_listening=start_listening,
             team=team,
+            log_level=20,  # temporary logging
             **kwargs,
         )
         self._tera_strategy = tera_strategy
@@ -119,7 +120,7 @@ class MetronomePlayer(Player):
             non_tera_orders = self._filter_non_tera_orders(orders)
             return non_tera_orders
         except Exception as e:
-            error_logger.exception(f"Failed while generating orders: {e}.")
+            ERROR_LOGGER.exception(f"Failed while generating orders: {e}.")
             return []
 
     @override
@@ -148,5 +149,5 @@ class MetronomePlayer(Player):
             if orders:
                 return random.choice(orders)
         except Exception as e:
-            error_logger.exception(f"Failed while selecting move: {e}.")
+            ERROR_LOGGER.exception(f"Failed while selecting move: {e}.")
         return DoubleBattleOrder(DefaultBattleOrder(), DefaultBattleOrder())

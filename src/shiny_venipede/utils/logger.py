@@ -34,4 +34,4 @@ def _create_logger(name: str, level: int = logging.INFO) -> logging.Logger:
     return logger
 
 
-error_logger = _create_logger("error_logger", logging.ERROR)
+ERROR_LOGGER = _create_logger("error_logger", logging.ERROR)
