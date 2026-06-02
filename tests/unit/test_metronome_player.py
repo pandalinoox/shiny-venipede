@@ -132,3 +132,17 @@ async def test_choose_move_handles_exception(
         assert isinstance(result, DoubleBattleOrder)
         assert isinstance(result.first_order, DefaultBattleOrder)
         assert isinstance(result.second_order, DefaultBattleOrder)
+
+
+async def test_choose_move_fallback_on_rejected_turn(
+    default_double_battle: DoubleBattle, offline_metronome_player: MetronomePlayer
+):
+    battle_id = default_double_battle.battle_tag
+    current_turn = default_double_battle.turn
+    offline_metronome_player._last_calculated_turn[battle_id] = current_turn
+
+    result = await offline_metronome_player.choose_move(default_double_battle)
+
+    assert isinstance(result, DoubleBattleOrder)
+    assert isinstance(result.first_order, DefaultBattleOrder)
+    assert isinstance(result.second_order, DefaultBattleOrder)
