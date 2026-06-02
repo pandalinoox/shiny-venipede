@@ -1,5 +1,5 @@
 import random
-from typing import Any, override
+from typing import Any, Final, override
 
 from poke_env.battle.abstract_battle import AbstractBattle
 from poke_env.battle.double_battle import DoubleBattle
@@ -38,7 +38,7 @@ class MetronomePlayer(Player):
         BATTLE_FORMAT: set to gen9metronomebattle
     """
 
-    BATTLE_FORMAT = "gen9metronomebattle"
+    BATTLE_FORMAT: Final = "gen9metronomebattle"
 
     def __init__(
         self,

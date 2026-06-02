@@ -1,4 +1,5 @@
 import logging
+from typing import Final
 
 
 def _create_logger(name: str, level: int = logging.INFO) -> logging.Logger:
@@ -34,4 +35,4 @@ def _create_logger(name: str, level: int = logging.INFO) -> logging.Logger:
     return logger
 
 
-ERROR_LOGGER = _create_logger("error_logger", logging.ERROR)
+ERROR_LOGGER: Final = _create_logger("error_logger", logging.ERROR)
