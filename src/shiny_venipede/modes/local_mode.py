@@ -2,11 +2,12 @@ from typing import override
 
 from shiny_venipede.modes.mode import Mode
 from shiny_venipede.players.metronome_player import MetronomePlayer
+from shiny_venipede.utils.logger import ERROR_LOGGER
 
 
 class LocalMode(Mode):
     """
-    Concrete implementation of Mode for running local battles between two bot1
+    Concrete implementation of Mode for running local battles between two bots.
 
     Attributes:
         _bot1 (MetronomePlayer): First bot participating in battle.
@@ -29,4 +30,7 @@ class LocalMode(Mode):
         Returns:
             None
         """
-        await self._bot1.battle_against(self._bot2, n_battles=no_of_battle)
+        try:
+            await self._bot1.battle_against(self._bot2, n_battles=no_of_battle)
+        except Exception as e:
+            ERROR_LOGGER.exception(f"Error in LocalMode: {e}")
