@@ -33,6 +33,8 @@ class MetronomePlayer(Player):
     Attributes:
         _tera_strategy (TeraStrategy): Strategy to determine which orders may Terastallize.
         Defaults to NULL_TERA_STRATEGY.
+        _last_calculated_turns (dict[str, int]): Map of battle identifiers to their last
+        processed turn numbers to catch and resolve invalid server choice loops.
 
     Constants:
         BATTLE_FORMAT: set to gen9metronomebattle
@@ -64,6 +66,16 @@ class MetronomePlayer(Player):
             **kwargs,
         )
         self._tera_strategy = tera_strategy
+        self._last_calculated_turn: dict[str, int] = {}
+
+    def _create_default_double_battle_order(self) -> DoubleBattleOrder:
+        """
+        Creates DoubleBattleOrder with DefaultBattleOrder.
+
+        Returns:
+            DoubleBattleOrder: Default double battle order.
+        """
+        return DoubleBattleOrder(DefaultBattleOrder(), DefaultBattleOrder())
 
     def _filter_non_tera_orders(
         self, orders: list[DoubleBattleOrder]
@@ -138,16 +150,32 @@ class MetronomePlayer(Player):
             TypeError: If battle is not DoubleBattle.
 
         Behavior:
-            - Generates valid orders using _get_orders.
-            - Randomly selects an order if any are available.
-            - Falls back to default DoubleBattleOrder if no valid orders exist.
+            - Validates that the current battle instance is a DoubleBattle.
+            - Checks if a choice was already submitted for the current turn; if a retry
+              is detected, immediately falls back to a default DoubleBattleOrder.
+            - Updates the internal turn tracker to prevent endless server retry loops.
+            - Generates valid combined orders using _get_orders.
+            - Randomly selects an order if any valid choices are available.
+            - Falls back to a default DoubleBattleOrder if an exception occurs or if
+              no valid orders exist.
         """
         if not isinstance(battle, DoubleBattle):
             raise TypeError("MetronomePlayer only supports DoubleBattle instances")
+
+        battle_id = battle.battle_tag
+        current_turn = battle.turn
+
+        if self._last_calculated_turn.get(battle_id) == current_turn:
+            ERROR_LOGGER.warning(
+                f"Previous move was rejected for {current_turn} in {battle_id}"
+            )
+            return self._create_default_double_battle_order()
+
+        self._last_calculated_turn[battle_id] = current_turn
         try:
             orders = self._get_orders(battle)
             if orders:
                 return random.choice(orders)
         except Exception as e:
             ERROR_LOGGER.exception(f"Failed while selecting move: {e}.")
-        return DoubleBattleOrder(DefaultBattleOrder(), DefaultBattleOrder())
+        return self._create_default_double_battle_order()
