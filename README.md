@@ -23,8 +23,8 @@ A Pokémon Showdown bot built for `gen9metronomebattle` — fully async, stat-tr
 
 ## Planned Features
 
-- [ ] 🖥️ **TUI** — a slick text user interface for interactive battle management
-- [ ] 🧠 **Smart Tera Strategy** — smarter in-battle decision making
+- [ ] 🖥️ **TUI** — Interactive terminal UI for managing players, teams, strategies
+- [ ] 🧠 **Smart Tera Strategy** — smarter in-battle tera decision making
 - [ ] 📝 **Improved Battle Logging** — detailed per-battle logs
 - [ ] 🏆 **Local Tournament Mode** — run multiplayer tournaments locally with multiple bot players
 
@@ -109,7 +109,7 @@ PASSWORD=your_showdown_password
 
 ```
 shiny_venipede/configs/team_config.py   ← swap in your own team export
-shiny_venipede/strategies/              ← implement a custom tera strategy
+shiny_venipede/strategies/tera/         ← implement a custom tera strategy
 ```
 
 The default setup uses `MEGA_ABSOL_TEAM` with `FirstTurnTeraStrategy`, which terastallizes on the first available turn.

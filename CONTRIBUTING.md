@@ -13,8 +13,8 @@ These are the open areas where help is most wanted:
 
 | Task | Notes |
 |---|---|
-| 🖥️ **TUI** | Interactive battle management — `textual` or `rich` would fit well |
-| 🧠 **Smarter battle strategies** | Better move selection and tera decision logic |
+| 🖥️ **Terminal User Interface** | Manage players, teams, strategies, and live sessions through an interactive terminal UI — [textual](https://github.com/Textualize/textual) would fit well |
+| 🧠 **Smarter tera strategies** | Better tera decision logic, based on current in-game stats like boosts |
 | 📝 **Better logging** | Structured per-battle logs (JSON or similar) |
 | 🏆 **Local tournament mode** | Multi-bot round-robin tournaments |
 
