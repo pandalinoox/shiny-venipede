@@ -6,8 +6,10 @@ from shiny_venipede.strategies.tera.first_turn_tera_strategy import (
 )
 
 
-async def test_real_battle_completes():
-    bot1 = create_local_test_bot(username="bot1", tera_strategy=FirstTurnTeraStrategy())
+async def test_real_battle_completes(first_turn_tera_strategy: FirstTurnTeraStrategy):
+    bot1 = create_local_test_bot(
+        username="bot1", tera_strategy=first_turn_tera_strategy
+    )
     bot2 = create_local_test_bot(username="bot2")
 
     no_of_battles = 10
