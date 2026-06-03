@@ -50,6 +50,7 @@ exclude_lines = [
     "if __name__ == .__main__.:",
     "raise NotImplementedError",
 ]
+omit = ["src/shiny_venipede/__main__.py"]
 
 [tool.ruff]
 target-version = "py314"
@@ -84,4 +85,5 @@ project-includes = [
     "**/*.py*",
     "**/*.ipynb",
 ]
+search-path = ["src","."]
 preset="strict"

@@ -1,0 +1,181 @@
+import random
+from typing import Any, Final, override
+
+from poke_env.battle.abstract_battle import AbstractBattle
+from poke_env.battle.double_battle import DoubleBattle
+from poke_env.player import (
+    BattleOrder,
+    DefaultBattleOrder,
+    DoubleBattleOrder,
+    Player,
+    SingleBattleOrder,
+)
+from poke_env.ps_client import (
+    AccountConfiguration,
+    LocalhostServerConfiguration,
+    ServerConfiguration,
+)
+from poke_env.teambuilder.teambuilder import Teambuilder
+
+from shiny_venipede.strategies.tera.null_tera_strategy import NULL_TERA_STRATEGY
+from shiny_venipede.strategies.tera.tera_strategy import TeraStrategy
+from shiny_venipede.utils.logger import ERROR_LOGGER
+
+
+class MetronomePlayer(Player):
+    """
+    Player for Metronome Battle.
+
+    Randomly selects from all valid combined orders in a DoubleBattle.
+    If Terastallization is available, orders may be filtered by the configured tera strategy.
+    Falls back to a default DoubleBattleOrder if no valid orders are available.
+
+    Attributes:
+        _tera_strategy (TeraStrategy): Strategy to determine which orders may Terastallize.
+        Defaults to NULL_TERA_STRATEGY.
+        _last_calculated_turns (dict[str, int]): Map of battle identifiers to their last
+        processed turn numbers to catch and resolve invalid server choice loops.
+
+    Constants:
+        BATTLE_FORMAT: set to gen9metronomebattle
+    """
+
+    BATTLE_FORMAT: Final = "gen9metronomebattle"
+
+    def __init__(
+        self,
+        *args: Any,
+        account_configuration: AccountConfiguration | None = None,
+        avatar: str | None = None,
+        server_configuration: ServerConfiguration = LocalhostServerConfiguration,
+        start_listening: bool = True,
+        team: str | Teambuilder | None = None,
+        tera_strategy: TeraStrategy = NULL_TERA_STRATEGY,
+        **kwargs: Any,
+    ):
+        super().__init__(
+            *args,
+            account_configuration=account_configuration,
+            avatar=avatar,
+            battle_format=self.BATTLE_FORMAT,
+            server_configuration=server_configuration,
+            start_timer_on_battle_start=True,
+            start_listening=start_listening,
+            team=team,
+            log_level=20,  # temporary logging
+            **kwargs,
+        )
+        self._tera_strategy = tera_strategy
+        self._last_calculated_turn: dict[str, int] = {}
+
+    def _create_default_double_battle_order(self) -> DoubleBattleOrder:
+        """
+        Creates DoubleBattleOrder with DefaultBattleOrder.
+
+        Returns:
+            DoubleBattleOrder: Default double battle order.
+        """
+        return DoubleBattleOrder(DefaultBattleOrder(), DefaultBattleOrder())
+
+    def _filter_non_tera_orders(
+        self, orders: list[DoubleBattleOrder]
+    ) -> list[DoubleBattleOrder]:
+        """
+        Filters DoubleBattleOrder instances to return only orders without Terastallization.
+
+        Args:
+            orders (list[DoubleBattleOrder]): All possible combined orders.
+
+        Returns:
+            list[DoubleBattleOrder]: Orders without Terastallization.
+        """
+
+        def is_non_tera(order: SingleBattleOrder | None) -> bool:
+            return order is not None and not order.terastallize
+
+        non_tera_orders = [
+            o
+            for o in orders
+            if (is_non_tera(o.first_order)) and (is_non_tera(o.second_order))
+        ]
+
+        return non_tera_orders
+
+    def _get_orders(self, battle: DoubleBattle) -> list[DoubleBattleOrder]:
+        """
+        Generates combined DoubleBattle orders, optionally filtered by the configured tera strategy.
+        Falls back to non-Terastallized orders if no tera orders are returned.
+
+        Args:
+            battle (DoubleBattle): Current battle state containing valid orders.
+
+        Returns:
+            list[DoubleBattleOrder]: All possible combined orders, optionally filtered when
+            Terastallization is available. Returns an empty list if generation fails.
+
+        Behavior:
+            - Returns all orders if Terastallization is unavailable.
+            - Filters orders using the configured tera strategy when available.
+            - Falls back to non-Terastallized orders if no tera orders are returned.
+            - Returns an empty list if generation fails.
+        """
+        try:
+            orders = DoubleBattleOrder.join_orders(*battle.valid_orders)
+
+            if not battle.can_tera:
+                return orders
+
+            tera_orders = self._tera_strategy.filter_orders(battle, orders)
+            if tera_orders:
+                return tera_orders
+
+            non_tera_orders = self._filter_non_tera_orders(orders)
+            return non_tera_orders
+        except Exception as e:
+            ERROR_LOGGER.exception(f"Failed while generating orders: {e}.")
+            return []
+
+    @override
+    async def choose_move(self, battle: AbstractBattle) -> BattleOrder:
+        """
+        Selects a move for a DoubleBattle using a random valid combined order.
+
+        Args:
+            battle (AbstractBattle): Current battle state.
+
+        Returns:
+            BattleOrder: Selected battle order.
+
+        Raises:
+            TypeError: If battle is not DoubleBattle.
+
+        Behavior:
+            - Validates that the current battle instance is a DoubleBattle.
+            - Checks if a choice was already submitted for the current turn; if a retry
+              is detected, immediately falls back to a default DoubleBattleOrder.
+            - Updates the internal turn tracker to prevent endless server retry loops.
+            - Generates valid combined orders using _get_orders.
+            - Randomly selects an order if any valid choices are available.
+            - Falls back to a default DoubleBattleOrder if an exception occurs or if
+              no valid orders exist.
+        """
+        if not isinstance(battle, DoubleBattle):
+            raise TypeError("MetronomePlayer only supports DoubleBattle instances")
+
+        battle_id = battle.battle_tag
+        current_turn = battle.turn
+
+        if self._last_calculated_turn.get(battle_id) == current_turn:
+            ERROR_LOGGER.warning(
+                f"Previous move was rejected for {current_turn} in {battle_id}"
+            )
+            return self._create_default_double_battle_order()
+
+        self._last_calculated_turn[battle_id] = current_turn
+        try:
+            orders = self._get_orders(battle)
+            if orders:
+                return random.choice(orders)
+        except Exception as e:
+            ERROR_LOGGER.exception(f"Failed while selecting move: {e}.")
+        return self._create_default_double_battle_order()
