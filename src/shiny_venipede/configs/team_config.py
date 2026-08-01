@@ -25,10 +25,12 @@ MEGA_ABSOL_TEAM = TeamConfig(
     Lonely Nature
     - Metronome
 
-    Chandelure-Mega @ Choice Specs
-    Ability: Storm Drain
+    Golurk-Mega @ Choice Band
+    Ability: Ice Scales
+    Level: 50
+    Tera Type: stellar
     EVs: 252 HP / 252 Atk / 252 Def / 252 SpA / 252 SpD / 252 Spe
-    Hasty Nature
+    Brave Nature
     - Metronome
     """,
 )
